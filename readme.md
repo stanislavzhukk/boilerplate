@@ -1,4 +1,4 @@
-# 🚀 Boilerplate: API + PostgreSQL + PGAdmin
+# Boilerplate: API + PostgreSQL + PGAdmin
 
 This repository provides a ready-to-use local development environment with:
 
@@ -11,7 +11,7 @@ Everything is wired together with Docker Compose for easy setup.
 
 ---
 
-## 📦 Tech Stack
+## Tech Stack
 
 - .NET 8 (ASP.NET Core)
 - PostgreSQL 16
@@ -21,9 +21,9 @@ Everything is wired together with Docker Compose for easy setup.
 
 ---
 
-## ⚙️ Getting Started
+## Getting Started
 
-### 1️⃣ Prerequisites
+### 1 Prerequisites
 
 Make sure you have installed:
 
@@ -32,17 +32,19 @@ Make sure you have installed:
 
 ---
 
-### 2️⃣ Environment variables
+### 2 Environment variables
 
 Create a `.env` file from the example:
 
 ```bash
 cp .env.example .env
+```
 
 Build and start all services:
 
 ```bash
 docker compose up --build
+```
 
  Services & URLs
 

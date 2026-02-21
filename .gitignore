@@ -364,6 +364,8 @@ FodyWeavers.xsd
 
 /bin
 /obj
+.env
 
 **/bin/
 **/obj/
+**/.env

@@ -10,7 +10,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Api/Dockerfile
+      dockerfile: API/Dockerfile
       target: final
     container_name: api-dev
     ports:

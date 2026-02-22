@@ -2,6 +2,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Data.Context;
 using Data.Models;
+using Services.Interfaces;
+using Services.Services;
+using Data.Interfaces;
+using Data.Repositories;
+using Data.Seeders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +24,15 @@ builder.Services.AddIdentity<User, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddControllers();
+//Add repositories
+builder.Services.AddScoped<IModel1Repository, Model1Repository>();
 
+//Add services
+builder.Services.AddScoped<IModel1Service, Model1Service>();
+
+
+
+builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -37,16 +49,26 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var dbContext = services.GetRequiredService<ApplicationDbContext>();
-        //var userManager = services.GetRequiredService<UserManager<User>>();
+        var userManager = services.GetRequiredService<UserManager<User>>();
+        if(dbContext.Database.GetPendingMigrations().Any())
+        {
+            Console.WriteLine("Applying pending migrations...");
+            await dbContext.Database.MigrateAsync();
+            Console.WriteLine("Migrations applied successfully.");
+        }
 
-        await dbContext.Database.MigrateAsync();
+        await RolesSeeder.SeedRoles(services);
 
-        //var seeder = new SeedData(roleManager, userManager, dbContext);
-        //await seeder.InitializeAsync();
+        if (userManager.Users.Count() < 2)
+        {
+            await UsersSeeder.SeedUsers(services);
+        }
+
+        await ModelsSeeder.SeedModels(services);
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"error during migration: {ex.Message} | {ex.InnerException}");
+        Console.WriteLine($"error during migration/seeds: {ex.Message} | {ex.InnerException}");
     }
 }
 

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Data.Models;
+using Data.Interfaces;
+using Services.Interfaces;
 
 namespace Api.Controllers
 {
@@ -7,24 +9,21 @@ namespace Api.Controllers
     [Route("[controller]")]
     public class TestModelController : ControllerBase
     {
-
         private readonly ILogger<TestModelController> _logger;
+        private readonly IModel1Service _testModelService;
 
-        public TestModelController(ILogger<TestModelController> logger)
+        public TestModelController(ILogger<TestModelController> logger, IModel1Service testService)
         {
             _logger = logger;
+            _testModelService = testService;
         }
 
-        [HttpGet(Name = "GetModel")]
-        public IEnumerable<Model1> Get()
+        [HttpGet("models/{id}")]
+
+        public async Task<ActionResult<Model1>> GetModelById(Guid id)
         {
-            return Enumerable.Range(1, 5).Select(index => new Model1
-            {
-                Id = new Guid(),
-                Name = "Test",
-                Model2s = new List<Model2>()
-            })
-            .ToArray();
+            var model = await _testModelService.GetByIdAsync(id);
+            return Ok(model);
         }
     }
 }

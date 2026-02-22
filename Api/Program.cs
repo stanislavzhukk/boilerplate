@@ -7,11 +7,11 @@ using Services.Services;
 using Data.Interfaces;
 using Data.Repositories;
 using Data.Seeders;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
 
 //Add DbContext with PostgreSQL provider
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -24,11 +24,29 @@ builder.Services.AddIdentity<User, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+
+//jwt 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters.ValidIssuer = builder.Configuration["Jwt:Issuer"];
+    options.TokenValidationParameters.ValidAudience = builder.Configuration["Jwt:Audience"];
+    options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(
+        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("Jwt:SecretKey not configured"))
+    );
+});
+
+builder.Services.AddAuthorization();
+
 //Add repositories
 builder.Services.AddScoped<IModel1Repository, Model1Repository>();
 
 //Add services
 builder.Services.AddScoped<IModel1Service, Model1Service>();
+builder.Services.AddScoped<ILoginService, LoginService>();
 
 
 
@@ -63,8 +81,10 @@ using (var scope = app.Services.CreateScope())
         {
             await UsersSeeder.SeedUsers(services);
         }
-
-        await ModelsSeeder.SeedModels(services);
+        if (!dbContext.Model1s.Any())
+        {
+            await ModelsSeeder.SeedModels(services);
+        }
     }
     catch (Exception ex)
     {
@@ -80,6 +100,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

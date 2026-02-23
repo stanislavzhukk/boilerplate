@@ -15,6 +15,7 @@ WORKDIR /src
 COPY ["API/Api.csproj", "API/"]
 COPY ["Data/Data.csproj", "Data/"]
 COPY ["Services/Services.csproj", "Services/"]
+COPY ["DTO/DTO.csproj", "DTO/"]
 RUN dotnet restore "API/Api.csproj"
 COPY . .
 WORKDIR "/src/API/"

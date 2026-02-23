@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Data.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Data.Models;
+using System.Reflection.Emit;
 
 namespace Data.Context
 {
@@ -13,11 +14,21 @@ namespace Data.Context
 
         public DbSet<Model2> Model2s { get; set; }
         public DbSet<Model1> Model1s { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            // Configure the relationship between Model1 and Model2
+
+            builder.Entity<RefreshToken>()
+            .HasOne(rt => rt.User)
+            .WithMany(u => u.RefreshTokens)
+            .HasForeignKey(rt => rt.UserId);
+
+            builder.Entity<RefreshToken>()
+                .HasIndex(rt => rt.Token)
+                .IsUnique();
+
             builder.Entity<Model1>()
                 .HasMany(m => m.Model2s)
                 .WithOne()

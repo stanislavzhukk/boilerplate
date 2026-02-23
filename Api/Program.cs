@@ -43,10 +43,11 @@ builder.Services.AddAuthorization();
 
 //Add repositories
 builder.Services.AddScoped<IModel1Repository, Model1Repository>();
+builder.Services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
 
 //Add services
 builder.Services.AddScoped<IModel1Service, Model1Service>();
-builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 

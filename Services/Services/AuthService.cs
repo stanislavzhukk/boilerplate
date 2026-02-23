@@ -36,20 +36,6 @@ namespace Services.Services
             return await _jwtService.GenerateTokensAsync(user);
         }
 
-        public async Task<AuthTokensResponse> RefreshAsync(string refreshToken)
-        {
-            var tokenEntity = await _jwtService.ValidateRefreshTokenAsync(refreshToken);
-
-            var user = await _userManager.FindByIdAsync(tokenEntity.UserId.ToString());
-            if (user == null)
-                throw new UnauthorizedAccessException("User not found");
-
-            _jwtService.RevokeRefreshToken(tokenEntity);
-            await _refreshTokensRepository.UpdateAsync(tokenEntity);
-
-            return await _jwtService.GenerateTokensAsync(user);
-        }
-
         public async Task<string?> RefreshAccessTokenAsync(string refreshToken)
         {
             var tokenEntity = await _jwtService.ValidateRefreshTokenAsync(refreshToken);
@@ -67,7 +53,13 @@ namespace Services.Services
 
         public Task LogoutAsync(string refreshToken)
         {
-            throw new NotImplementedException();
+            var tokenEntity = _refreshTokensRepository.GetRefreshTokenAsync(refreshToken).Result;  
+            if (tokenEntity == null)
+            {
+                return Task.CompletedTask;
+            }
+            _jwtService.RevokeRefreshToken(tokenEntity);
+            return Task.CompletedTask;
         }
 
         public async Task<User> RegisterAsync(RegisterRequest request)

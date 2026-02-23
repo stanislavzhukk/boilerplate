@@ -105,6 +105,17 @@ namespace Services.Services
             {
                 throw new SecurityTokenException("Invalid refresh token");
             }
+
+            if(tokenEntity.Expires < DateTime.UtcNow)
+            {
+                RevokeRefreshToken(tokenEntity);
+                throw new SecurityTokenException("Refresh token has expired");
+            }
+
+            if(tokenEntity.Expires < DateTime.UtcNow.AddHours(12))
+            {
+                tokenEntity.Expires = DateTime.UtcNow.AddDays(7);
+            }
             return tokenEntity;
         }
 

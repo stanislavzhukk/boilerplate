@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
+using DTO.Requests;
 using Services.Services;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace API.Controllers
 {
@@ -17,10 +18,25 @@ namespace API.Controllers
             _authService = authService;
         }
 
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] DTO.Requests.RegisterRequest request)
+        {
+            try
+            {
+                var result = await _authService.RegisterAsync(request);
+                return Ok(new { message = "Registration successful." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Registration failed for email: {Email}", request.Email);
+                return StatusCode(500, new { message = $"An error occurred during registration." });
+            }
+        }
+
         //public async Task<Result<T>> Login([FromBody] ...)
         // For simplicity, we return IActionResult here, but in a real application, consider using a consistent response wrapper
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody]LoginRequest request)
+        public async Task<IActionResult> Login([FromBody]DTO.Requests.LoginRequest request)
         {
             try
             {
@@ -37,19 +53,11 @@ namespace API.Controllers
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
         {
-            try
-            {
-                var tokens = await _authService.RefreshAsync(request.RefreshToken);
-                if (tokens == null)
-                    return Unauthorized(new { message = "Invalid or expired refresh token." });
+            var accessToken = await _authService.RefreshAccessTokenAsync(request.RefreshToken);
+            if (accessToken == null)
+                return Unauthorized();
 
-                return Ok(new { tokens.AccessToken, tokens.RefreshToken });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Token refresh failed for refresh token: {RefreshToken}", request.RefreshToken);
-                return Unauthorized(new { message = "Invalid or expired refresh token." });
-            }
+            return Ok(new { AccessToken = accessToken });
         }
     }
 }

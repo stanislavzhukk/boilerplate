@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Data.Models;
 using Data.Interfaces;
 using Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class TestModelController : ControllerBase
     {
         private readonly ILogger<TestModelController> _logger;

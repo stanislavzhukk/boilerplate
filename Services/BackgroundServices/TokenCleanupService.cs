@@ -1,26 +1,41 @@
 ﻿
-using Microsoft.Extensions.Hosting;
 using Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Services.BackgroundServices
 {
     public class TokenCleanupService : BackgroundService
     {
-        private readonly IRefreshTokensRepository _repository;
+        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly ILogger<TokenCleanupService> _logger;
 
-        public TokenCleanupService(IRefreshTokensRepository repository)
+
+        public TokenCleanupService(IServiceScopeFactory scopeFactory, ILogger<TokenCleanupService> logger)
         {
-            _repository = repository;
+            _scopeFactory = scopeFactory;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+
             while (!stoppingToken.IsCancellationRequested)
             {
-                // Удаляем expired и revoked токены
-                await _repository.DeleteExpiredAndRevokedAsync();
-
-                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                try
+                {
+                    using var scope = _scopeFactory.CreateScope();
+                    var _repository = scope.ServiceProvider.GetRequiredService<IRefreshTokensRepository>();
+                    await _repository.DeleteExpiredAndRevokedAsync();
+                    Console.WriteLine("Expired and revoked tokens cleaned up.");
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogError(ex, "Error during cleaning tokens");
+                }
+                await Task.Delay(TimeSpan.FromHours(12), stoppingToken);
             }
         }
     }

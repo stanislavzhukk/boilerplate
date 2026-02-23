@@ -7,7 +7,7 @@ namespace API.Controllers
 {
     [Controller]
     [Route("[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : ControllerBase 
     {
         private readonly ILogger<AuthController> _logger;
         private readonly IAuthService _authService; 

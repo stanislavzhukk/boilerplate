@@ -20,7 +20,7 @@ namespace Api.Controllers
 
         [HttpGet("models/{id}")]
 
-        public async Task<ActionResult<Model1>> GetModelById(Guid id)
+        public async Task<ActionResult<Model1>> GetModelById(Guid id) 
         {
             var model = await _testModelService.GetByIdAsync(id);
             return Ok(model);

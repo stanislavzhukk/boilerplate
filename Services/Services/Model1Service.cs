@@ -1,6 +1,5 @@
 ﻿using Data.Interfaces;
 using Data.Models;
-using Data.Repositories;
 using Services.Interfaces;
 
 
@@ -19,11 +18,7 @@ namespace Services.Services
             var model = await _repository.GetByIdAsync(id);
             if (model == null)
             {
-                return new Model1()
-                {
-                    Id = Guid.Empty,
-                    Name = "Not found",
-                };
+                throw new KeyNotFoundException($"Model1 with id {id} not found.");
             }
             return model;
         }

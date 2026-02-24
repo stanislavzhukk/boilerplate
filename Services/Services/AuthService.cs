@@ -1,11 +1,7 @@
 ﻿using Data.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Services.Interfaces;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using DTO.Responses;
 using Data.Interfaces;
 using DTO.Requests;
@@ -17,15 +13,18 @@ namespace Services.Services
         private readonly UserManager<User> _userManager;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
         private readonly JwtService _jwtService;
+        private readonly IHashService _hashService;
 
         public AuthService(
             UserManager<User> userManager,
             IRefreshTokensRepository refreshTokens,
-            JwtService jwtService)
+            JwtService jwtService,
+            IHashService hashService)
         {
             _userManager = userManager;
             _refreshTokensRepository = refreshTokens;
             _jwtService = jwtService;
+            _hashService = hashService;
         }
 
         public async Task<AuthTokensResponse> LoginAsync(string email, string password)
@@ -40,11 +39,15 @@ namespace Services.Services
         {
             var tokenEntity = await _jwtService.ValidateRefreshTokenAsync(refreshToken);
             if (tokenEntity == null)
-                return null;
+            {
+                throw new SecurityTokenException("Invalid refresh token");
+            }
 
             var user = await _userManager.FindByIdAsync(tokenEntity.UserId.ToString());
             if (user == null)
-                return null;
+            {
+                throw new SecurityTokenException("User not found");
+            }
 
             var newAccessToken = await _jwtService.GenerateAccessTokenAsync(user);
 
@@ -53,10 +56,11 @@ namespace Services.Services
 
         public Task LogoutAsync(string refreshToken)
         {
-            var tokenEntity = _refreshTokensRepository.GetRefreshTokenAsync(refreshToken).Result;  
-            if (tokenEntity == null)
+            var hashedToken = _hashService.ComputeSha256Hash(refreshToken);
+            var tokenEntity = _refreshTokensRepository.GetRefreshTokenAsync(hashedToken).Result;
+            if (tokenEntity == null || tokenEntity.Revoked != null)
             {
-                return Task.CompletedTask;
+                throw new SecurityTokenException("Invalid refresh token");
             }
             _jwtService.RevokeRefreshToken(tokenEntity);
             return Task.CompletedTask;

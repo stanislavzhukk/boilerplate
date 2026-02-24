@@ -22,10 +22,19 @@ namespace Api.Controllers
 
         [HttpGet("models/{id}")]
 
-        public async Task<ActionResult<Model1>> GetModelById(Guid id) 
+        public async Task<ActionResult<Model1>> GetModelById(Guid id)
         {
-            var model = await _testModelService.GetByIdAsync(id);
-            return Ok(model);
+            try
+            {
+                var model = await _testModelService.GetByIdAsync(id);
+                return Ok(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching model with id {Id}", id);
+                return StatusCode(500, $"Internal server error. Details:{ex.Message}");
+
+            }
         }
     }
 }

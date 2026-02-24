@@ -1,10 +1,10 @@
 ﻿using Data.Interfaces;
 using Data.Models;
 using DTO.Responses;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Services.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -16,14 +16,16 @@ namespace Services.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
-
         private readonly IConfiguration _configuration;
+        private readonly IHashService _hashService;
 
-        public JwtService(UserManager<User> userManager, IRefreshTokensRepository refreshTokensRepository, IConfiguration configuration)
+        public JwtService(UserManager<User> userManager, IRefreshTokensRepository refreshTokensRepository, 
+            IConfiguration configuration, IHashService hashService)
         {
             _userManager = userManager;
             _refreshTokensRepository = refreshTokensRepository;
             _configuration = configuration;
+            _hashService = hashService;
         }
 
         public async Task<AuthTokensResponse> GenerateTokensAsync(User user)
@@ -34,7 +36,7 @@ namespace Services.Services
 
             var rawRefreshToken = refreshTokenEntity.Token;
 
-            refreshTokenEntity.Token = ComputeSha256Hash(refreshTokenEntity.Token);
+            refreshTokenEntity.Token = _hashService.ComputeSha256Hash(refreshTokenEntity.Token);
 
             await _refreshTokensRepository.AddRefreshTokenAsync(refreshTokenEntity);
 
@@ -98,17 +100,20 @@ namespace Services.Services
 
         public async Task<RefreshToken> ValidateRefreshTokenAsync(string refreshToken)
         {
-            var hashedToken = ComputeSha256Hash(refreshToken);
+            var hashedToken = _hashService.ComputeSha256Hash(refreshToken);
             var tokenEntity = await _refreshTokensRepository.GetRefreshTokenAsync(hashedToken);
 
-            if (tokenEntity is null || !tokenEntity.IsActive)
+            if (tokenEntity is null)
             {
                 throw new SecurityTokenException("Invalid refresh token");
             }
 
-            if(tokenEntity.Expires < DateTime.UtcNow)
+            if(!tokenEntity.IsActive)
             {
-                RevokeRefreshToken(tokenEntity);
+                if(tokenEntity.Revoked == null)
+                {
+                    RevokeRefreshToken(tokenEntity);
+                }
                 throw new SecurityTokenException("Refresh token has expired");
             }
 
@@ -121,16 +126,15 @@ namespace Services.Services
 
         public void RevokeRefreshToken(RefreshToken token)
         {
-            token.Revoked = DateTime.UtcNow;
+            try
+            {
+                token.Revoked = DateTime.UtcNow;
+                _refreshTokensRepository.UpdateAsync(token).Wait();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error revoking refresh token: {ex.Message}");
+            }
         }
-
-        private static string ComputeSha256Hash(string input)
-        {
-            using var sha256 = SHA256.Create();
-            var bytes = Encoding.UTF8.GetBytes(input);
-            var hash = sha256.ComputeHash(bytes);
-            return Convert.ToBase64String(hash);
-        }
-
     }
 }

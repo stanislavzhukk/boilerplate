@@ -1,6 +1,5 @@
 ﻿using Data.Context;
 using Data.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Data.Seeders

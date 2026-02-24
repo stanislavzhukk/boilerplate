@@ -26,7 +26,7 @@ builder.Services.AddIdentity<User, IdentityRole<Guid>>()
     .AddDefaultTokenProviders();
 
 
-//jwt 
+//jwt configuration
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -49,11 +49,10 @@ builder.Services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
 //Add services
 builder.Services.AddScoped<IModel1Service, Model1Service>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IHashService, HashService>();
 builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddHostedService<TokenCleanupService>();
-
-
 
 builder.Services.AddControllers();
 
@@ -127,7 +126,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
 }
 
 

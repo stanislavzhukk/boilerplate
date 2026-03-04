@@ -1,11 +1,11 @@
 ﻿using Domain.Interfaces;
 using Domain.Models;
-using Infrastructure.Context;
+using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 
-namespace Infrastructure.Repositories
+namespace Infrastructure.Persistence.Repositories
 {
     public class Model1Repository : IModel1Repository
     {

@@ -10,9 +10,10 @@ using Domain.Interfaces;
 using Domain.Models;
 using Infrastructure.BackgroundServices;
 using Infrastructure.Caching;
-using Infrastructure.Context;
-using Infrastructure.Repositories;
 using Infrastructure.Seeders;
+using Infrastructure.Persistence.Context;
+using Infrastructure.Persistence.Repositories;
+using Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,7 +60,7 @@ builder.Services.AddScoped<ICacheService, RedisCacheService>();
 builder.Services.AddScoped<IModel1Service, Model1Service>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IHashService, HashService>();
-builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<ITokenService, JwtService>();
 
 builder.Services.AddHostedService<TokenCleanupService>();
 

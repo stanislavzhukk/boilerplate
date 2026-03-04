@@ -8,5 +8,6 @@ namespace Domain.Interfaces
         Task DeleteExpiredAndRevokedAsync();
         Task<RefreshToken?> GetRefreshTokenAsync(string refreshToken);
         Task UpdateAsync(RefreshToken tokenEntity);
+        Task RevokeTokenAsync(RefreshToken tokenEntity);
     }
 }

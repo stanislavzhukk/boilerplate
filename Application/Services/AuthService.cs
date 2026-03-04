@@ -3,7 +3,6 @@ using Microsoft.IdentityModel.Tokens;
 using Application.DTO.Requests.Auth;
 using Application.DTO.Responses;
 using Application.Interfaces;
-using Application.Services;
 using Domain.Interfaces;
 using Domain.Models;
 
@@ -13,13 +12,13 @@ namespace Services.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
-        private readonly JwtService _jwtService;
+        private readonly ITokenService _jwtService;
         private readonly IHashService _hashService;
 
         public AuthService(
             UserManager<User> userManager,
             IRefreshTokensRepository refreshTokens,
-            JwtService jwtService,
+            ITokenService jwtService,
             IHashService hashService)
         {
             _userManager = userManager;
@@ -31,7 +30,7 @@ namespace Services.Services
         public async Task<AuthResponse> LoginAsync(LoginRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
-            if(user == null)
+            if (user == null)
             {
                 throw new InvalidOperationException("Invalid email or password");
             }
@@ -43,16 +42,51 @@ namespace Services.Services
                 throw new InvalidOperationException("Invalid email or password");
             }
 
-            var response = await _jwtService.GenerateTokensAsync(user);
-            return response;
+            var accessToken = await _jwtService.GenerateAccessTokenAsync(user);
+
+            var refreshTokenEntity = await _jwtService.GenerateRefreshTokenAsync(user);
+            var rawRefreshToken = refreshTokenEntity.Token;
+            refreshTokenEntity.Token = _hashService.ComputeHash(refreshTokenEntity.Token);
+
+            await _refreshTokensRepository.AddRefreshTokenAsync(refreshTokenEntity);
+
+            return new AuthResponse
+            {
+                AccessToken = accessToken,
+                RefreshToken = rawRefreshToken,
+                User = new UserDataResponse
+                {
+                    Id = user.Id.ToString(),
+                    Name = user.Name,
+                    Surname = user.Surname,
+                    Email = user.Email!
+                }
+            };
         }
 
         public async Task<RefreshResponse> RefreshAccessTokenAsync(RefreshRequest request)
         {
-            var tokenEntity = await _jwtService.ValidateRefreshTokenAsync(request.RefreshToken);
+            var hashedToken = _hashService.ComputeHash(request.RefreshToken);
+            var tokenEntity = await _refreshTokensRepository.GetRefreshTokenAsync(hashedToken);
             if (tokenEntity == null)
             {
                 throw new SecurityTokenException("Invalid refresh token");
+            }
+
+            if (!tokenEntity.IsActive)
+            {
+                if (tokenEntity.Revoked == null)
+                {
+                    tokenEntity.Revoked = DateTime.UtcNow;
+                    await _refreshTokensRepository.UpdateAsync(tokenEntity);
+                }
+                throw new SecurityTokenException("Refresh token has expired");
+            }
+
+            if (tokenEntity.Expires < DateTime.UtcNow.AddHours(12))
+            {
+                tokenEntity.Expires = DateTime.UtcNow.AddDays(7);
+                await _refreshTokensRepository.UpdateAsync(tokenEntity);
             }
 
             var user = await _userManager.FindByIdAsync(tokenEntity.UserId.ToString());
@@ -72,7 +106,7 @@ namespace Services.Services
                     Name = user.Name,
                     Surname = user.Surname,
                     Email = user.Email!
-                }   
+                }
             };
         }
 
@@ -84,7 +118,8 @@ namespace Services.Services
             {
                 throw new SecurityTokenException("Invalid refresh token");
             }
-            _jwtService.RevokeRefreshToken(tokenEntity);
+
+            await _refreshTokensRepository.RevokeTokenAsync(tokenEntity);
         }
 
         public async Task<User> RegisterAsync(RegisterRequest request)

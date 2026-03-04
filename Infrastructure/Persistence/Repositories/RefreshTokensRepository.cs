@@ -1,9 +1,9 @@
 ﻿using Domain.Interfaces;
 using Domain.Models;
-using Infrastructure.Context;
+using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Repositories
+namespace Infrastructure.Persistence.Repositories
 {
     public class RefreshTokensRepository : IRefreshTokensRepository
     {
@@ -42,6 +42,13 @@ namespace Infrastructure.Repositories
                 _context.RefreshTokens.RemoveRange(expiredTokens);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public Task RevokeTokenAsync(RefreshToken tokenEntity)
+        {
+            tokenEntity.Revoked = DateTime.UtcNow;
+            _context.RefreshTokens.Update(tokenEntity);
+            return _context.SaveChangesAsync();
         }
     }
 }

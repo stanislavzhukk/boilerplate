@@ -1,5 +1,5 @@
 ﻿using Domain.Models;
-using Infrastructure.Context;
+using Infrastructure.Persistence.Context;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Seeders

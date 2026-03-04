@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace Infrastructure.Context
+namespace Infrastructure.Persistence.Context
 {
     public class DbContextInitializer
     {

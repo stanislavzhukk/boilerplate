@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Data.Models;
-using Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Services.Infrastructure.Email;
-using Services.Infrastructure.Caching;
+using Application.Interfaces;
+using Domain.Models;
+using Infrastructure.Email;
 
 namespace Api.Controllers
 {

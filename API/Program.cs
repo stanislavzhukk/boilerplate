@@ -1,17 +1,18 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Data.Context;
-using Data.Models;
-using Services.Interfaces;
 using Services.Services;
-using Data.Interfaces;
-using Data.Repositories;
-using Data.Seeders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Services.Infrastructure.BackgroundServices;
-using Services.Infrastructure.Caching;
+using Application.Interfaces;
+using Application.Services;
+using Domain.Interfaces;
+using Domain.Models;
+using Infrastructure.BackgroundServices;
+using Infrastructure.Caching;
+using Infrastructure.Context;
+using Infrastructure.Repositories;
+using Infrastructure.Seeders;
 
 var builder = WebApplication.CreateBuilder(args);
 

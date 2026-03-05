@@ -29,11 +29,11 @@ namespace Infrastructure.Email
             return await client.ExecuteAsync(request);
         }
 
-        public static async Task SendMailpit(string toEmail, string subject, string text, string html)
+        public static async Task SendMailpit(string reciever, string subject, string text, string html)
         {
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress("Test Sender", "test@local.dev"));
-            message.To.Add(new MailboxAddress(toEmail, toEmail));
+            message.To.Add(new MailboxAddress(reciever, reciever));
             message.Subject = subject;
 
             var bodyBuilder = new BodyBuilder

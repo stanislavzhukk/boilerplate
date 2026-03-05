@@ -51,10 +51,10 @@ namespace Api.Controllers
             try
             {
                 await MailSender.SendMailpit(
-                    "stanislav.zhuk@studenci.collegiumwitelona.pl",
-                    "Test Mailpit",
-                    "This is test mail via Mailpit",
-                    "<h1>Test</h1><p>mail via Mailpit</p>"
+                    reciever:"reciever@local.dev",
+                    subject:"Test Mailpit",
+                    text:"This is test mail via Mailpit",
+                    html:"<h1>Test</h1><p>mail via Mailpit</p>"
                 );
                 return Ok("Email sent successfully");
             }

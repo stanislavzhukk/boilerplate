@@ -1,5 +1,4 @@
-﻿using Application.DTO.Responses;
-using Application.Interfaces;
+﻿using Application.Interfaces;
 using Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -15,13 +14,11 @@ namespace Infrastructure.Identity
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
-        private readonly IHashService _hashService;
 
-        public JwtService(UserManager<User> userManager, IConfiguration configuration, IHashService hashService)
+        public JwtService(UserManager<User> userManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _configuration = configuration;
-            _hashService = hashService;
         }
 
         public async Task<string> GenerateAccessTokenAsync(User user)

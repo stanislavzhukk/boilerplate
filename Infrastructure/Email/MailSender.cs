@@ -29,9 +29,6 @@ namespace Infrastructure.Email
             return await client.ExecuteAsync(request);
         }
 
-        // ---------------------------
-        // Метод 2: Mailpit через SMTP
-        // ---------------------------
         public static async Task SendMailpit(string toEmail, string subject, string text, string html)
         {
             var message = new MimeMessage();

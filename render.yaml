@@ -14,16 +14,23 @@ services:
       - key: ASPNETCORE_HTTP_PORTS
         value: 8080
 
+      - key: POSTGRES_HOST
+        value: postgres-db.internal
+      - key: POSTGRES_DB
+        value: mydb
+      - key: POSTGRES_USER
+        value: postgres
+      - key: POSTGRES_PASSWORD
+        value: mysecretpassword
       - key: ConnectionStrings__DefaultConnection
-        fromDatabase:
-          name: postgres-db
-          property: connectionString
+        value: "Host=${POSTGRES_HOST};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};"
 
+      - key: REDIS_HOST
+        value: redis.internal
+      - key: REDIS_PORT
+        value: 6379
       - key: ConnectionStrings__Redis
-        fromService:
-          name: redis
-          type: redis
-          property: connectionString
+        value: "${REDIS_HOST}:${REDIS_PORT}"
 
       - key: MAILGUN_API_KEY
         sync: false

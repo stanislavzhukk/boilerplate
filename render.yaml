@@ -43,8 +43,6 @@ services:
     dockerfilePath: ./mailpit/Dockerfile
     dockerContext: ./mailpit
     env: docker
-    ports:
-      - 8025
 
 databases:
   - name: postgres-db

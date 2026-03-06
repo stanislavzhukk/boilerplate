@@ -37,8 +37,8 @@ services:
     name: redis
     plan: free
     ipAllowList:
-      - source: private
-        description: internal connections only
+      - source: 0.0.0.0/0
+        description: everywhere
 
 databases:
   - name: postgres-db

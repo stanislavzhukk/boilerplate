@@ -30,8 +30,6 @@ services:
       - key: Jwt__SecretKey
         sync: false
 
-    healthCheckPath: /
-
   - type: web
     name: pgadmin
     env: docker
@@ -43,8 +41,6 @@ services:
         value: admin@example.com
       - key: PGADMIN_DEFAULT_PASSWORD
         value: admin
-      - key: PGADMIN_CONFIG_SERVER_MODE
-        value: "False"
 
   - type: web
     name: mailpit
@@ -56,6 +52,9 @@ services:
   - type: redis
     name: redis
     plan: free
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
 
 databases:
   - name: postgres-db

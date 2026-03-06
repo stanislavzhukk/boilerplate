@@ -7,9 +7,9 @@ services:
     startCommand: dotnet API.dll
     envVars:
       - key: ConnectionStrings__DefaultConnection
-        value: User ID=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Host=${POSTGRES_HOST};Port=${POSTGRES_PORT};Database=${POSTGRES_DB};
+        value: Host=${POSTGRES_HOST};Port=${POSTGRES_PORT};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB};SSL Mode=Require;Trust Server Certificate=true
       - key: ConnectionStrings__Redis
-        value: ${REDIS_HOST}:${REDIS_PORT}
+        value: rediss://${REDIS_USER}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}
       - key: ASPNETCORE_URLS
         value: http://+:8080
       - key: ASPNETCORE_ENVIRONMENT
@@ -24,15 +24,19 @@ services:
     plan: starter
     envVars:
       - key: POSTGRES_USER
-        value: admin
+        value: ${POSTGRES_USER}
       - key: POSTGRES_PASSWORD
-        value: example
+        value: ${POSTGRES_PASSWORD}
       - key: POSTGRES_DB
-        value: mydb
+        value: ${POSTGRES_DB}  
+      - key: POSTGRES_HOST
+        value: ${POSTGRES_HOST}
 
   - type: redis
     name: redis-cache
     plan: starter
     envVars:
-      - key: REDIS_PASSWORD
-        value: ""
+      - key: REDIS_HOST
+        value: ${REDIS_HOST}      
+      - key: REDIS_PORT
+        value: ${REDIS_PORT}   

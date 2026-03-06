@@ -1,42 +1,38 @@
 services:
   - type: web
     name: api
-    env: development
+    env: docker
     plan: starter
-    buildCommand: cd API && docker build -f Dockerfile -t api .
-    startCommand: dotnet API.dll
+    dockerfilePath: ./API/Dockerfile
     envVars:
       - key: ConnectionStrings__DefaultConnection
-        value: Host=${POSTGRES_HOST};Port=${POSTGRES_PORT};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB};SSL Mode=Require;Trust Server Certificate=true
+        fromDatabase:
+          name: postgres-db
+          property: connectionString
+
       - key: ConnectionStrings__Redis
-        value: rediss://${REDIS_USER}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}
+        fromService:
+          type: redis
+          name: redis-cache
+          property: connectionString
+
       - key: ASPNETCORE_URLS
         value: http://+:8080
+
       - key: ASPNETCORE_ENVIRONMENT
         value: Development
-      - key: MAILGUN_API_KEY
-        value: ${MAILGUN_API_KEY}
-      - key: Jwt__SecretKey
-        value: ${Jwt__SecretKey}
 
-  - type: postgresql
+      - key: MAILGUN_API_KEY
+        sync: false
+
+      - key: Jwt__SecretKey
+        sync: false
+
+  - type: pserv
     name: postgres-db
     plan: starter
-    envVars:
-      - key: POSTGRES_USER
-        value: ${POSTGRES_USER}
-      - key: POSTGRES_PASSWORD
-        value: ${POSTGRES_PASSWORD}
-      - key: POSTGRES_DB
-        value: ${POSTGRES_DB}  
-      - key: POSTGRES_HOST
-        value: ${POSTGRES_HOST}
+    postgresMajorVersion: 15
 
   - type: redis
     name: redis-cache
     plan: starter
-    envVars:
-      - key: REDIS_HOST
-        value: ${REDIS_HOST}      
-      - key: REDIS_PORT
-        value: ${REDIS_PORT}   

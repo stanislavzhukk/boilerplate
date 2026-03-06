@@ -1,57 +1,38 @@
 services:
   - type: web
     name: api
-    env: docker
-    plan: free
-    dockerfilePath: ./API/Dockerfile
-    dockerContext: .
-    autoDeploy: true
+    env: development
+    plan: starter
+    buildCommand: cd API && docker build -f Dockerfile -t api .
+    startCommand: dotnet API.dll
     envVars:
-      - key: ASPNETCORE_ENVIRONMENT
-        value: Development
+      - key: ConnectionStrings__DefaultConnection
+        value: User ID=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Host=${POSTGRES_HOST};Port=${POSTGRES_PORT};Database=${POSTGRES_DB};
+      - key: ConnectionStrings__Redis
+        value: ${REDIS_HOST}:${REDIS_PORT}
       - key: ASPNETCORE_URLS
         value: http://+:8080
-      - key: ASPNETCORE_HTTP_PORTS
-        value: 8080
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Development
+      - key: MAILGUN_API_KEY
+        value: ${MAILGUN_API_KEY}
+      - key: Jwt__SecretKey
+        value: ${Jwt__SecretKey}
 
-      - key: POSTGRES_HOST
-        value: postgres-db.internal
+  - type: postgresql
+    name: postgres-db
+    plan: starter
+    envVars:
+      - key: POSTGRES_USER
+        value: admin
+      - key: POSTGRES_PASSWORD
+        value: example
       - key: POSTGRES_DB
         value: mydb
-      - key: POSTGRES_USER
-        value: postgres
-      - key: POSTGRES_PASSWORD
-        value: mysecretpassword
-
-      - key: ConnectionStrings__DefaultConnection
-        value: "Host=postgres-db.internal;Database=mydb;Username=postgres;Password=mysecretpassword;"
-
-      - key: REDIS_HOST
-        value: redis.internal
-      - key: REDIS_PORT
-        value: 6379
-      - key: ConnectionStrings__Redis
-        value: "redis.internal:6379"
-
-      - key: MAILGUN_API_KEY
-        sync: false
-      - key: Jwt__SecretKey
-        sync: false
 
   - type: redis
-    name: redis
-    plan: free
-    ipAllowList:
-      - source: 0.0.0.0/0
-        description: everywhere
-
-  - type: web
-    name: mailpit
-    plan: free
-    dockerfilePath: ./mailpit/Dockerfile
-    dockerContext: ./mailpit
-    env: docker
-
-databases:
-  - name: postgres-db
-    plan: free
+    name: redis-cache
+    plan: starter
+    envVars:
+      - key: REDIS_PASSWORD
+        value: ""

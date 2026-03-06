@@ -4,7 +4,15 @@ services:
     env: docker
     plan: starter
     dockerfilePath: ./API/Dockerfile
+    autoDeploy: true
+
     envVars:
+      - key: ASPNETCORE_URLS
+        value: http://+:8080
+
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+
       - key: ConnectionStrings__DefaultConnection
         fromDatabase:
           name: postgres-db
@@ -12,15 +20,9 @@ services:
 
       - key: ConnectionStrings__Redis
         fromService:
-          type: redis
           name: redis-cache
+          type: redis
           property: connectionString
-
-      - key: ASPNETCORE_URLS
-        value: http://+:8080
-
-      - key: ASPNETCORE_ENVIRONMENT
-        value: Development
 
       - key: MAILGUN_API_KEY
         sync: false
@@ -28,11 +30,12 @@ services:
       - key: Jwt__SecretKey
         sync: false
 
-  - type: pserv
-    name: postgres-db
-    plan: starter
-    postgresMajorVersion: 15
 
   - type: redis
     name: redis-cache
+    plan: starter
+
+
+databases:
+  - name: postgres-db
     plan: starter

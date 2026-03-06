@@ -30,10 +30,12 @@ services:
       - key: Jwt__SecretKey
         sync: false
 
-
   - type: redis
     name: redis-cache
     plan: starter
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: allow all
 
 
 databases:

@@ -5,43 +5,40 @@ services:
     plan: free
     dockerfilePath: ./API/Dockerfile
     dockerContext: .
+    autoDeploy: true
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Development
+
       - key: ASPNETCORE_URLS
         value: http://+:8080
+
       - key: ASPNETCORE_HTTP_PORTS
         value: 8080
+
+      - key: ConnectionStrings__DefaultConnection
+        fromDatabase:
+          name: postgres-db
+          property: connectionString
+
+      - key: ConnectionStrings__Redis
+        fromService:
+          name: redis
+          type: redis
+          property: connectionString
+
       - key: MAILGUN_API_KEY
         sync: false
+
       - key: Jwt__SecretKey
         sync: false
-
-  - type: web
-    name: pgadmin
-    env: docker
-    plan: free
-    image: dpage/pgadmin4:latest
-    envVars:
-      - key: PGADMIN_DEFAULT_EMAIL
-        value: admin@example.com
-      - key: PGADMIN_DEFAULT_PASSWORD
-        value: admin
-      - key: PGADMIN_CONFIG_SERVER_MODE
-        value: "False"
-
-  - type: web
-    name: mailpit
-    env: docker
-    plan: free
-    image: axllent/mailpit:v1.27.9
 
   - type: redis
     name: redis
     plan: free
     ipAllowList:
-      - source: 0.0.0.0/0
-        description: everywhere
+      - source: private
+        description: internal connections only
 
 databases:
   - name: postgres-db

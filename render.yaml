@@ -40,4 +40,4 @@ services:
 
 databases:
   - name: postgres-db
-    plan: starter
+    plan: free

@@ -22,15 +22,16 @@ services:
         value: postgres
       - key: POSTGRES_PASSWORD
         value: mysecretpassword
+
       - key: ConnectionStrings__DefaultConnection
-        value: "Host=${POSTGRES_HOST};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};"
+        value: "Host=postgres-db.internal;Database=mydb;Username=postgres;Password=mysecretpassword;"
 
       - key: REDIS_HOST
         value: redis.internal
       - key: REDIS_PORT
         value: 6379
       - key: ConnectionStrings__Redis
-        value: "${REDIS_HOST}:${REDIS_PORT}"
+        value: "redis.internal:6379"
 
       - key: MAILGUN_API_KEY
         sync: false

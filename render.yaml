@@ -2,7 +2,7 @@ services:
   - type: web
     name: api
     env: docker
-    plan: starter
+    plan: free
     dockerfilePath: ./API/Dockerfile
     autoDeploy: true
 
@@ -32,7 +32,7 @@ services:
 
   - type: redis
     name: redis-cache
-    plan: starter
+    plan: free
     ipAllowList:
       - source: 0.0.0.0/0
         description: allow all

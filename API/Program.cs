@@ -18,16 +18,55 @@ using Infrastructure.Identity;
 var builder = WebApplication.CreateBuilder(args);
 
 //Add DbContext with PostgreSQL provider
+var conn = builder.Configuration.GetConnectionString("DefaultConnection")!;
+
+if (conn.StartsWith("postgres://") || conn.StartsWith("postgresql://"))
+{
+    var uri = new Uri(conn);
+    var userInfo = uri.UserInfo.Split(':');
+
+    var cs = new Npgsql.NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Port = uri.Port,
+        Database = uri.AbsolutePath.Trim('/'),
+        Username = userInfo[0],
+        Password = userInfo[1],
+        SslMode = Npgsql.SslMode.Require,
+    };
+
+    conn = cs.ConnectionString;
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(conn);
 });
 
-builder.Services.AddStackExchangeRedisCache(options =>
+var redisUrl = builder.Configuration.GetConnectionString("Redis")!;
+
+if (redisUrl.StartsWith("redis://") || redisUrl.StartsWith("rediss://"))
 {
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-    options.InstanceName = "HarpagonApp";
-});
+    var uri = new Uri(redisUrl);
+    var userInfo = uri.UserInfo.Split(':');
+
+    var password = userInfo.Length > 1 ? userInfo[1] : "";
+
+    var config = $"{uri.Host}:{uri.Port},password={password},ssl={uri.Scheme == "rediss"}";
+
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = config;
+    });
+}
+else
+{
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisUrl;
+        options.InstanceName = "Sample";
+    });
+}
 
 //Add Identity services
 builder.Services.AddIdentity<User, IdentityRole<Guid>>()

@@ -14,6 +14,7 @@ using Infrastructure.Seeders;
 using Infrastructure.Persistence.Context;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Identity;
+using Infrastructure.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 

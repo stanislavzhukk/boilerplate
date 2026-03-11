@@ -30,16 +30,18 @@ services:
 
       - key: Jwt__SecretKey
         sync: false
+        
+  - type: redis
+    name: redis-cache
+    plan: free
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
+
 
 
 databases:
   - name: postgres-db
     databaseName: database
     user: user
-    plan: free
-
-
-services:
-  - type: redis
-    name: redis-cache
     plan: free

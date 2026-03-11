@@ -27,6 +27,8 @@ if (connectionString.StartsWith("postgres://"))
     connectionString = ConnectionUrlConverter.ConvertPostgresUrl(connectionString);
 }
 
+Console.WriteLine($"postgres url: {connectionString}");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(connectionString);
@@ -38,6 +40,8 @@ if (redisUrl.StartsWith("redis://"))
 {
     redisUrl = ConnectionUrlConverter.ConvertRedisUrl(redisUrl);
 }
+
+Console.WriteLine($"Redis url: {redisUrl}");
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {

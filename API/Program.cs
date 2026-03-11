@@ -1,73 +1,50 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Services.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Application.Interfaces;
 using Application.Services;
 using Domain.Interfaces;
 using Domain.Models;
 using Infrastructure.BackgroundServices;
 using Infrastructure.Caching;
-using Infrastructure.Seeders;
+using Infrastructure.Identity;
 using Infrastructure.Persistence.Context;
 using Infrastructure.Persistence.Repositories;
-using Infrastructure.Identity;
+using Infrastructure.Seeders;
 using Infrastructure.Shared;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Services.Services;
+using System;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //Add DbContext with PostgreSQL provider
-var conn = builder.Configuration.GetConnectionString("DefaultConnection")!;
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
-if (conn.StartsWith("postgres://") || conn.StartsWith("postgresql://"))
+if (connectionString.StartsWith("postgres://"))
 {
-    var uri = new Uri(conn);
-    var userInfo = uri.UserInfo.Split(':');
-
-    var cs = new Npgsql.NpgsqlConnectionStringBuilder
-    {
-        Host = uri.Host,
-        Port = uri.Port,
-        Database = uri.AbsolutePath.Trim('/'),
-        Username = userInfo[0],
-        Password = userInfo[1],
-        SslMode = Npgsql.SslMode.Require,
-    };
-
-    conn = cs.ConnectionString;
+    connectionString = ConnectionUrlConverter.ConvertPostgresUrl(connectionString);
 }
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseNpgsql(conn);
+    options.UseNpgsql(connectionString);
 });
 
 var redisUrl = builder.Configuration.GetConnectionString("Redis")!;
 
-if (redisUrl.StartsWith("redis://") || redisUrl.StartsWith("rediss://"))
+if (redisUrl.StartsWith("redis://"))
 {
-    var uri = new Uri(redisUrl);
-    var userInfo = uri.UserInfo.Split(':');
-
-    var password = userInfo.Length > 1 ? userInfo[1] : "";
-
-    var config = $"{uri.Host}:{uri.Port},password={password},ssl={uri.Scheme == "rediss"}";
-
-    builder.Services.AddStackExchangeRedisCache(options =>
-    {
-        options.Configuration = config;
-    });
+    redisUrl = ConnectionUrlConverter.ConvertRedisUrl(redisUrl);
 }
-else
+
+builder.Services.AddStackExchangeRedisCache(options =>
 {
-    builder.Services.AddStackExchangeRedisCache(options =>
-    {
-        options.Configuration = redisUrl;
-        options.InstanceName = "Sample";
-    });
-}
+    options.Configuration = redisUrl;
+    options.InstanceName = "Sample";
+});
+
 
 //Add Identity services
 builder.Services.AddIdentity<User, IdentityRole<Guid>>()

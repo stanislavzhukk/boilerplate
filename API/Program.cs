@@ -22,12 +22,11 @@ var builder = WebApplication.CreateBuilder(args);
 //Add DbContext with PostgreSQL provider
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
-if (connectionString.StartsWith("postgres://"))
+if (connectionString.StartsWith("postgresql://"))
 {
     connectionString = ConnectionUrlConverter.ConvertPostgresUrl(connectionString);
 }
 
-Console.WriteLine($"postgres url: {connectionString}");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -41,7 +40,6 @@ if (redisUrl.StartsWith("redis://"))
     redisUrl = ConnectionUrlConverter.ConvertRedisUrl(redisUrl);
 }
 
-Console.WriteLine($"Redis url: {redisUrl}");
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,14 +15,14 @@ namespace Infrastructure.Shared
 
             var userInfo = uri.UserInfo.Split(':', 2);
 
-            var builder = new Npgsql.NpgsqlConnectionStringBuilder
+            var builder = new NpgsqlConnectionStringBuilder
             {
                 Host = uri.Host,
-                Port = uri.Port,
+                Port = uri.IsDefaultPort ? 5432 : uri.Port,
                 Username = userInfo[0],
                 Password = userInfo.Length > 1 ? userInfo[1] : "",
                 Database = uri.AbsolutePath.TrimStart('/'),
-                SslMode = Npgsql.SslMode.Require,
+                SslMode = SslMode.Require,
             };
 
             return builder.ToString();

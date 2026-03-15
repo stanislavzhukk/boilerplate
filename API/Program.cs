@@ -1,34 +1,52 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Services.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Application.Interfaces;
 using Application.Services;
 using Domain.Interfaces;
 using Domain.Models;
 using Infrastructure.BackgroundServices;
 using Infrastructure.Caching;
-using Infrastructure.Seeders;
+using Infrastructure.Identity;
 using Infrastructure.Persistence.Context;
 using Infrastructure.Persistence.Repositories;
-using Infrastructure.Identity;
+using Infrastructure.Seeders;
 using Infrastructure.Shared;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Services.Services;
+using System;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //Add DbContext with PostgreSQL provider
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+
+if (connectionString.StartsWith("postgresql://"))
+{
+    connectionString = ConnectionUrlConverter.ConvertPostgresUrl(connectionString);
+}
+
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(connectionString);
 });
+
+var redisUrl = builder.Configuration.GetConnectionString("Redis")!;
+
+if (redisUrl.StartsWith("redis://"))
+{
+    redisUrl = ConnectionUrlConverter.ConvertRedisUrl(redisUrl);
+}
+
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-    options.InstanceName = "HarpagonApp";
+    options.Configuration = redisUrl;
+    options.InstanceName = "Sample";
 });
+
 
 //Add Identity services
 builder.Services.AddIdentity<User, IdentityRole<Guid>>()

@@ -42,6 +42,4 @@ services:
 
 databases:
   - name: postgres-db
-    databaseName: database
-    user: user
     plan: free

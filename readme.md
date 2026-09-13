@@ -1,11 +1,13 @@
 # Boilerplate: API + PostgreSQL + PGAdmin
 
 This repository provides a ready-to-use local development environment with:
-
-- ASP.NET Core API  
-- PostgreSQL running in Docker  
-- PGAdmin web UI for database management  
-- Swagger for API exploration and testing  
+- .NET 8 (ASP.NET Core)
+- PostgreSQL 16
+- PGAdmin 4
+- Docker & Docker Compose
+- Entity Framework Core
+- Redis
+- Mailpit/Mailgun templates
 
 Everything is wired together with Docker Compose for easy setup.
 

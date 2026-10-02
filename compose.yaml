@@ -22,7 +22,6 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_ENVIRONMENT=Development
       - MAILGUN_API_KEY=${MAILGUN_API_KEY}
-      - Jwt__SecretKey=${Jwt__SecretKey}
     depends_on:
       postgres:
         condition: service_healthy

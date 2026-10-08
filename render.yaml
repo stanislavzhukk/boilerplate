@@ -57,7 +57,7 @@ services:
 
       # Mailgun
       - key: MAILGUN_API_KEY
-        value: 3daf614b7b8dd585fb9c90f16403714a-82cf32bf-9b406a66
+        value: d5524aee-67c9-4715-8a02-5cc6707f6368
 
       # JWT
       - key: Jwt__SecretKey
